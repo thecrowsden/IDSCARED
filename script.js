@@ -1,6 +1,6 @@
 /*
 by The Crow's Den
-v0.9
+v0.9.1
 */
 
 //ADD PORTABLE VERSION - single file + folder, body -> div
@@ -12,6 +12,8 @@ let scale = {
 }
 
 const div = {
+	unloaded: document.getElementById("div_unloaded"),
+	loadprotect: document.getElementById("div_loadprotect"),
 	header: document.getElementById("div_header"),
 	antipiracy: document.getElementById("div_antipiracy"),
 	wrongfile: document.getElementById("div_wrongfile"),
@@ -400,19 +402,26 @@ function change_pen(input_pen_target, input_pen_color) {
 
 function reset_icon() {
 	c.icon.drawImage(img.icon.template, 0, 0);
+	update_id();
 }
 
 function clear_icon() {
 	c.icon.drawImage(img.icon.bg, 0, 0);
+	update_id();
 }
 
 function reset_sign() {
 	c.sign.drawImage(img[user_id_type].sign.template, 0, 0);
 	sign_warning_set(false);
+	update_text();
+	update_id();
 }
 
 function clear_sign() {
 	c.sign.drawImage(img[user_id_type].sign.bg, 0, 0);
+	sign_warning_set(false);
+	update_text();
+	update_id();
 }
 
 function draw(destination, source, x, y) {
@@ -540,21 +549,6 @@ canvas.sign.addEventListener("pointermove", event => {
 	}
 	event.preventDefault();
 });
-
-const params = new URLSearchParams(document.location.search);
-if (id_types.includes(params.get("idtype"))) {
-	if (languages.includes(params.get("language"))) {
-		idmaker_setup(params.get("idtype"), params.get("language"));
-	} else {
-		idmaker_setup(params.get("idtype"), language.en);
-	}
-}
-if (params.get("dev") == 1) {
-	dev_unlock();
-}
-if (params.get("references") == 1) {
-	show_references();
-}
 
 const font = {
 	SPACE: {
@@ -1064,3 +1058,22 @@ const valid_chars = {
 		BRACKET_CLOSED: "BRACKET_CLOSED",
 	},
 }
+
+window.addEventListener("load", () => {
+	const params = new URLSearchParams(document.location.search);
+	if (id_types.includes(params.get("idtype"))) {
+		if (languages.includes(params.get("language"))) {
+			idmaker_setup(params.get("idtype"), params.get("language"));
+		} else {
+			idmaker_setup(params.get("idtype"), language.en);
+		}
+	}
+	if (params.get("dev") == 1) {
+		dev_unlock();
+	}
+	if (params.get("info") == 1) {
+		show_references();
+	}
+	div.unloaded.classList.add("hidden");
+	div.loadprotect.classList.remove("hidden");
+});
