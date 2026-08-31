@@ -3,7 +3,7 @@
 
 <!--
 by The Crow's Den
-v0.9.1
+v0.9.2
 -->
 
 <head>
@@ -17,102 +17,104 @@ v0.9.1
 <body>
 	<div id="div_header">
 		<h1>IMSCARED ID Maker</h1>
-		<p class="topless"><sup>v0.9.1, by The Crow's Den</sup></p>
+		<p class="topless"><sup>v0.9.2, by The Crow's Den</sup></p>
 	</div>
 	<div id="div_unloaded">
-		<p>Loading images, please wait!</p>
+		<p>Loading data, please wait!</p>
 	</div>
-	<div id="div_loadprotect" class="hidden">
-		<div id="div_antipiracy">
-			<p>Please provide your VIP Badge or Worker Card.<br><sup>Any modifications to the image will not be used in the editor.</sup></p>
-			<input type="file" id="input_file_id" autocomplete="off" oninput="check_file()"></input>
-			<br>
-			<div id="div_wrongfile" class="hidden">
-				<p class="text_error">The file provided is not a valid VIP Badge or Worker Card, or has been renamed.</p>
-			</div>
-			<div id="div_devloader" class="hidden">
-				<p>DEV MENU UNLOCKED<br>Please select your ID:</p>
-				<button type="button"class="button_dev" onclick="idmaker_setup(id_type.vip, language.en)">VIP badge</button>
-				<button type="button"class="button_dev" onclick="idmaker_setup(id_type.vip, language.it)">Badge VIP</button>
-				<button type="button"class="button_dev" onclick="idmaker_setup(id_type.vip, language.ptbr)">Crachá VIP</button>
-				<button type="button"class="button_dev" onclick="idmaker_setup(id_type.vip, language.ru)">VIP-пропуск</button>
-				<button type="button"class="button_dev" onclick="idmaker_setup(id_type.vip, language.fr)">Badge VIP</button>
-				<button type="button"class="button_dev" onclick="idmaker_setup(id_type.vip, language.de)">VIP-Ausweis</button>
+	<div id="div_css_loadprotect" class="force_display" style="display: none;">
+		<div id="div_loadprotect" class="hidden">
+			<div id="div_antipiracy">
+				<p>Please provide your VIP Badge or Worker Card.<br><sup>Any modifications to the image will not be used in the editor.</sup></p>
+				<input type="file" id="input_file_id" autocomplete="off" oninput="check_file()"></input>
 				<br>
-				<button type="button"class="button_dev" onclick="idmaker_setup(id_type.worker, language.en)">Worker card</button>
-				<button type="button"class="button_dev" onclick="idmaker_setup(id_type.worker, language.it)">Card lavoratore</button>
-				<button type="button"class="button_dev" onclick="idmaker_setup(id_type.worker, language.ptbr)">Cartão de trabalhador</button>
-				<button type="button"class="button_dev" onclick="idmaker_setup(id_type.worker, language.ru)">Карта рабочего</button>
-				<button type="button"class="button_dev" onclick="idmaker_setup(id_type.worker, language.fr)">Carte de Travail</button>
-				<button type="button"class="button_dev" onclick="idmaker_setup(id_type.worker, language.de)">Arbeiterkarte</button>
-			</div>
-			<button type="button" onclick="show_references()">Additional Info</button>
-		</div>
-		<div id="div_idmaker" class="hidden">
-			<div id="div_preview">
-				<canvas id="canvas_id" width="128" height="128"></canvas>
-				<br>
-				<h2>PREVIEW:</h2>
-				<label>Zoom:</label><input id="input_zoom_preview" type="range" min="1" max="12" value="4" autocomplete="off" oninput="update_scale()"></input>
-				<br>
-				<canvas id="canvas_preview" class="border_base" width="128" height="128"></canvas>
-				<br>
-				<div id="div_preview_pixelfix" class="hidden">
-					<label>Fix misplaced pixel:</label><input id="input_bool_pixelfix" type="checkbox" autocomplete="off" oninput="update_pixelfix()"></input>
+				<div id="div_wrongfile" class="hidden">
+					<p class="text_error">The file provided is not a valid VIP Badge or Worker Card, or has been renamed.</p>
 				</div>
+				<div id="div_devloader" class="hidden">
+					<p>DEV MENU UNLOCKED<br>Please select your ID:</p>
+					<button type="button"class="button_dev" onclick="idmaker_setup(id_type.vip, language.en)">VIP badge</button>
+					<button type="button"class="button_dev" onclick="idmaker_setup(id_type.vip, language.it)">Badge VIP</button>
+					<button type="button"class="button_dev" onclick="idmaker_setup(id_type.vip, language.ptbr)">Crachá VIP</button>
+					<button type="button"class="button_dev" onclick="idmaker_setup(id_type.vip, language.ru)">VIP-пропуск</button>
+					<button type="button"class="button_dev" onclick="idmaker_setup(id_type.vip, language.fr)">Badge VIP</button>
+					<button type="button"class="button_dev" onclick="idmaker_setup(id_type.vip, language.de)">VIP-Ausweis</button>
+					<br>
+					<button type="button"class="button_dev" onclick="idmaker_setup(id_type.worker, language.en)">Worker card</button>
+					<button type="button"class="button_dev" onclick="idmaker_setup(id_type.worker, language.it)">Card lavoratore</button>
+					<button type="button"class="button_dev" onclick="idmaker_setup(id_type.worker, language.ptbr)">Cartão de trabalhador</button>
+					<button type="button"class="button_dev" onclick="idmaker_setup(id_type.worker, language.ru)">Карта рабочего</button>
+					<button type="button"class="button_dev" onclick="idmaker_setup(id_type.worker, language.fr)">Carte de Travail</button>
+					<button type="button"class="button_dev" onclick="idmaker_setup(id_type.worker, language.de)">Arbeiterkarte</button>
+				</div>
+				<button type="button" onclick="show_references()">Additional Info</button>
 			</div>
-			<div id="div_icon">
-				<h2>ICON:</h2>
-				<label>Zoom:</label><input id="input_zoom_icon" type="range" min="1" max="36" value="12" autocomplete="off" oninput="update_scale()"></input>
-				<br>
-				<canvas id="canvas_icon" class="canvas_draw border_base" width="41" height="37"></canvas>
-				<br>
-				<label>Pen Color:</label><button id="input_button_icon_fg" type="button" class="button_color button_white" onclick="change_pen(pen_target.icon, color.fg)"></button><button id="input_button_icon_bg" type="button" class="button_color button_black" onclick="change_pen(pen_target.icon, color.bg)"><span class="spacer"></span></button><button type="button" class="button_reset" onclick="reset_icon()">Reset</button><button type="button" class="button_reset" onclick="clear_icon()">Clear</button>
-			</div>
-			<div id="div_sign">
-				<h2>NAME:</h2>
-				<label>Zoom:</label><input id="input_zoom_sign" type="range" min="1" max="18" value="6" autocomplete="off" oninput="update_scale()"></input>
-				<br>
-				<canvas id="canvas_sign" class="border_base"></canvas>
-				<br>
-				<div id="div_sign_text">
-					<label class="label_text">Name:</label><input id="input_text_name" type="text" placeholder="NAME" spellcheck="false" autocomplete="off" oninput="update_text()"></input>
-					<div id="div_sign_text_info" class="hidden">
-						<label class="label_text">Info:</label><input id="input_text_info" type="text" placeholder="INFO" spellcheck="false" autocomplete="off" oninput="update_text()"></input>
-					</div>
-					<div id="div_sign_warning" class="hidden">
-						<p class="text_error topless bottomless">WARNING: Changing the text will reset your drawing!</p>
+			<div id="div_idmaker" class="hidden">
+				<div id="div_preview">
+					<canvas id="canvas_id" width="128" height="128"></canvas>
+					<br>
+					<h2>PREVIEW:</h2>
+					<label>Zoom:</label><input id="input_zoom_preview" type="range" min="1" max="12" value="4" autocomplete="off" oninput="update_scale()"></input>
+					<br>
+					<canvas id="canvas_preview" class="border_base" width="128" height="128"></canvas>
+					<br>
+					<div id="div_preview_pixelfix" class="hidden">
+						<label>Fix misplaced pixel:</label><input id="input_bool_pixelfix" type="checkbox" autocomplete="off" oninput="update_pixelfix()"></input>
 					</div>
 				</div>
-				<div id="div_sign_draw" class="hidden">
-					<label>Pen Color:</label><button id="input_button_sign_fg" type="button" class="button_color" onclick="change_pen(pen_target.sign, color.fg)"></button><button id="input_button_sign_bg" type="button" class="button_color" onclick="change_pen(pen_target.sign, color.bg)"></button><span class="spacer"></span><button type="button" class="button_reset" onclick="reset_sign()">Reset</button>
+				<div id="div_icon">
+					<h2>ICON:</h2>
+					<label>Zoom:</label><input id="input_zoom_icon" type="range" min="1" max="36" value="12" autocomplete="off" oninput="update_scale()"></input>
+					<br>
+					<canvas id="canvas_icon" class="canvas_draw border_base" width="41" height="37"></canvas>
+					<br>
+					<label>Pen Color:</label><button id="input_button_icon_fg" type="button" class="button_color button_white" onclick="change_pen(pen_target.icon, color.fg)"></button><button id="input_button_icon_bg" type="button" class="button_color button_black" onclick="change_pen(pen_target.icon, color.bg)"><span class="spacer"></span></button><button type="button" class="button_reset" onclick="reset_icon()">Reset</button><button type="button" class="button_reset" onclick="clear_icon()">Clear</button>
 				</div>
-				<label>Draw Signature:</label><input id="input_bool_sign_draw" type="checkbox" autocomplete="off" oninput="update_sign_draw_state()"></input>
+				<div id="div_sign">
+					<h2>NAME:</h2>
+					<label>Zoom:</label><input id="input_zoom_sign" type="range" min="1" max="18" value="6" autocomplete="off" oninput="update_scale()"></input>
+					<br>
+					<canvas id="canvas_sign" class="border_base"></canvas>
+					<br>
+					<div id="div_sign_text">
+						<label class="label_text">Name:</label><input id="input_text_name" type="text" placeholder="NAME" spellcheck="false" autocomplete="off" oninput="update_text()"></input>
+						<div id="div_sign_text_info" class="hidden">
+							<label class="label_text">Info:</label><input id="input_text_info" type="text" placeholder="INFO" spellcheck="false" autocomplete="off" oninput="update_text()"></input>
+						</div>
+						<div id="div_sign_warning" class="hidden">
+							<p class="text_error topless bottomless">WARNING: Changing the text will reset your drawing!</p>
+						</div>
+					</div>
+					<div id="div_sign_draw" class="hidden">
+						<label>Pen Color:</label><button id="input_button_sign_fg" type="button" class="button_color" onclick="change_pen(pen_target.sign, color.fg)"></button><button id="input_button_sign_bg" type="button" class="button_color" onclick="change_pen(pen_target.sign, color.bg)"></button><span class="spacer"></span><button type="button" class="button_reset" onclick="reset_sign()">Reset</button>
+					</div>
+					<label>Draw Signature:</label><input id="input_bool_sign_draw" type="checkbox" autocomplete="off" oninput="update_sign_draw_state()"></input>
+				</div>
+				<div id="div_exporter">
+					<button type="button" class="button_download" onclick="download_id()">DOWNLOAD</button>
+				</div>
 			</div>
-			<div id="div_exporter">
-				<button type="button" class="button_download" onclick="download_id()">DOWNLOAD</button>
+			<div id="div_reference" class="hidden">
+				<button type="button" onclick="hide_references()">Back</button>
+				<p class="topless">Placeholder text, please come back later!</p>
+				<!--explain idmaker-->
+				<!--reference info and images - LAZY LOAD-->
 			</div>
-		</div>
-		<div id="div_reference" class="hidden">
-			<button type="button" onclick="hide_references()">Back</button>
-			<p class="topless">Placeholder text, please come back later!</p>
-			<!--explain idmaker-->
-			<!--reference info and images-->
-		</div>
-		<div id="div_hidden_preload_images" class="hidden">
-			<img id="img_ERROR" src="./images/ERROR.png">
-			<img id="img_icon_bg" src="./images/icon_bg.png">
-			<img id="img_icon_fg" src="./images/icon_fg.png">
-			<img id="img_icon_template" src="./images/icon_template.png">
-			<img id="img_vip_sign_bg" src="./images/vip_sign_bg.png">
-			<img id="img_vip_sign_fg" src="./images/vip_sign_fg.png">
-			<img id="img_vip_sign_template" src="./images/vip_sign_template.png">
-			<img id="img_vip_template" src="./images/vip_template.png">
-			<img id="img_worker_sign_bg" src="./images/worker_sign_bg.png">
-			<img id="img_worker_sign_fg" src="./images/worker_sign_fg.png">
-			<img id="img_worker_sign_template" src="./images/worker_sign_template.png">
-			<img id="img_worker_template" src="./images/worker_template.png">
-			<img id="img_worker_template_pixelfix" src="./images/worker_template_pixelfix.png">
+			<div id="div_hidden_preload_images" class="hidden">
+				<img id="img_ERROR" src="./images/ERROR.png">
+				<img id="img_icon_bg" src="./images/icon_bg.png">
+				<img id="img_icon_fg" src="./images/icon_fg.png">
+				<img id="img_icon_template" src="./images/icon_template.png">
+				<img id="img_vip_sign_bg" src="./images/vip_sign_bg.png">
+				<img id="img_vip_sign_fg" src="./images/vip_sign_fg.png">
+				<img id="img_vip_sign_template" src="./images/vip_sign_template.png">
+				<img id="img_vip_template" src="./images/vip_template.png">
+				<img id="img_worker_sign_bg" src="./images/worker_sign_bg.png">
+				<img id="img_worker_sign_fg" src="./images/worker_sign_fg.png">
+				<img id="img_worker_sign_template" src="./images/worker_sign_template.png">
+				<img id="img_worker_template" src="./images/worker_template.png">
+				<img id="img_worker_template_pixelfix" src="./images/worker_template_pixelfix.png">
+			</div>
 		</div>
 	</div>
 	<script src="./script.js"></script>

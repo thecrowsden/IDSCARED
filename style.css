@@ -1,6 +1,6 @@
 /*
 by The Crow's Den
-v0.9.1
+v0.9.2
 */
 
 body {background-color: black; color: white; font-family: sans-serif; text-align: center; text-wrap: balance;}
@@ -62,3 +62,5 @@ button {font-size: 1em; margin: 0.5em;}
 .button_download {font-size: 2em; margin: 1em 0 3em;}
 
 .hidden {display: none;}
+
+.force_display {display: block !important;}
