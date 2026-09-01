@@ -1,6 +1,6 @@
 /*
 by The Crow's Den
-v0.9.2
+v0.9.3
 */
 
 //ADD PORTABLE VERSION - single file + folder, body -> div
@@ -13,6 +13,7 @@ let scale = {
 
 const div = {
 	unloaded: document.getElementById("div_unloaded"),
+	css_loadprotect: document.getElementById("div_css_loadprotect"),
 	loadprotect: document.getElementById("div_loadprotect"),
 	header: document.getElementById("div_header"),
 	antipiracy: document.getElementById("div_antipiracy"),
@@ -1067,12 +1068,13 @@ window.addEventListener("load", () => {
 		} else {
 			idmaker_setup(params.get("idtype"), language.en);
 		}
-	}
-	if (params.get("dev") == 1) {
-		dev_unlock();
-	}
-	if (params.get("info") == 1) {
-		show_references();
+	} else {
+		if (params.get("dev") == 1) {
+			dev_unlock();
+		}
+		if (params.get("info") == 1) {
+			show_references();
+		}
 	}
 	div.unloaded.classList.add("hidden");
 	div.loadprotect.classList.remove("hidden");
