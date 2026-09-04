@@ -1,6 +1,6 @@
 /*
 by The Crow's Den
-v0.9.3
+v0.9.4
 */
 
 //ADD PORTABLE VERSION - single file + folder, body -> div
@@ -12,6 +12,8 @@ let scale = {
 }
 
 const div = {
+	hidden_preload_images: document.getElementById("div_hidden_preload_images"),
+	css_unloaded: document.getElementById("div_css_unloaded"),
 	unloaded: document.getElementById("div_unloaded"),
 	css_loadprotect: document.getElementById("div_css_loadprotect"),
 	loadprotect: document.getElementById("div_loadprotect"),
@@ -30,7 +32,6 @@ const div = {
 	sign_draw: document.getElementById("div_sign_draw"),
 	exporter: document.getElementById("div_exporter"),
 	reference: document.getElementById("div_reference"),
-	hidden_preload_images: document.getElementById("div_hidden_preload_images"),
 }
 
 const canvas = {

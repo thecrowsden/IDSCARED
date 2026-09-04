@@ -3,7 +3,7 @@
 
 <!--
 by The Crow's Den
-v0.9.3
+v0.9.4
 -->
 
 <head>
@@ -11,17 +11,12 @@ v0.9.3
 	<title>IMSCARED ID Maker</title>
 	<link rel="icon" type="image/x-icon" href="./images/favicon.ico">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<meta property="og:title" content="IMSCARED ID Maker">
+	<meta property="og:description" content="IMSCARED ID Maker by The Crow's Den">
 	<link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
-	<div id="div_header">
-		<h1>IMSCARED ID Maker</h1>
-		<p class="topless"><sup>v0.9.3, by The Crow's Den</sup></p>
-	</div>
-	<div id="div_unloaded">
-		<p>Loading data, please wait!</p>
-	</div>
 	<div id="div_hidden_preload_images" style="display: none;">
 		<img id="img_ERROR" src="./images/ERROR.png" alt="">
 		<img id="img_icon_bg" src="./images/icon_bg.png" alt="">
@@ -37,7 +32,19 @@ v0.9.3
 		<img id="img_worker_template" src="./images/worker_template.png" alt="">
 		<img id="img_worker_template_pixelfix" src="./images/worker_template_pixelfix.png" alt="">
 	</div>
+	<div id="div_header">
+		<h1>IMSCARED ID Maker</h1>
+		<p class="topless"><sup>v0.9.4, by The Crow's Den</sup></p>
+	</div>
+	<div id="div_css_unloaded" class="hidden">
+		<p>Loading stylesheet, please wait!</p>
+		<p>If you see this for more than a few seconds, there may be an issue.</p>
+	</div>
 	<div id="div_css_loadprotect" class="force_display" style="display: none;">
+		<div id="div_unloaded">
+			<p>Loading data, please wait!</p>
+			<p>If you see this for more than a few seconds, there may be an issue.</p>
+		</div>
 		<div id="div_loadprotect" class="hidden">
 			<div id="div_antipiracy">
 				<p>Please provide your VIP Badge or Worker Card.<br><sup>Any modifications to the image will not be used in the editor.</sup></p>
@@ -126,6 +133,7 @@ v0.9.3
 				<p>Placeholder - special font</p>
 				<img loading="lazy" class="reference_font_special" src="./images/references/font_special.png" alt="">
 				<p>Placeholder - palette</p>
+				<!--replace with table?-->
 				<img loading="lazy" class="reference_palette" src="./images/references/palette.png" alt="">
 				<p>Placeholder - download</p>
 				<a href="./images/references/imscared_id_references.7z" download="IMSCARED ID References.7z"><button>Download (!)</button></a>
