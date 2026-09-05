@@ -21,6 +21,8 @@ img, canvas {image-rendering: pixelated; vertical-align:bottom}
 
 .bottomless, h1, h2 {margin-bottom: 0;}
 
+.div_padding {margin-bottom: 2em;}
+
 .spacer {width: 2em;}
 
 label, input, button {vertical-align: middle;}
@@ -65,7 +67,7 @@ button {font-size: 1em; margin: 0.5em;}
 
 .button_magenta {background-color: magenta;}
 
-.button_download {font-size: 2em; margin: 1em 0 3em;}
+.button_download {font-size: 2em; margin: 1em 0 1em;}
 
 .reference_box button {font-size: 1.1em; padding: 0.15em 0.75em; margin-top: 0;}
 
