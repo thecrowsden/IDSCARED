@@ -1,13 +1,19 @@
 /*
 by The Crow's Den
-v0.9.4
+v1.0
 */
 
 body {background-color: black; color: white; font-family: sans-serif; text-align: center; text-wrap: balance;}
 
-img, canvas {image-rendering: pixelated;}
+a {color: #00ffff; text-decoration: none; font-weight: bold;}
 
-.border_base {border-style: solid;}
+a:hover {text-decoration: underline;}
+
+a:active {color: #00bfbf; text-decoration: underline;}
+
+img, canvas {image-rendering: pixelated; vertical-align:bottom}
+
+.border_base {border-style: solid; margin: 0.2em;}
 
 .canvas_draw {touch-action: none; cursor: crosshair;}
 
@@ -31,7 +37,7 @@ input[type=file]::file-selector-button {display: none;}
 
 input[type=checkbox] {width: 2em; height: 2em;}
 
-input[type=text] {font-size: 1em; width: 10.5em; margin: 0.25em; margin-right: 2em;}
+input[type=text] {font-size: 1em; text-transform: uppercase; width: 10em; margin: 0.25em; margin-right: 2em;}
 
 .label_text {display: inline-block; width: 4em; text-align: right;}
 
@@ -63,7 +69,15 @@ button {font-size: 1em; margin: 0.5em;}
 
 .reference_box button {font-size: 1.1em; padding: 0.15em 0.75em; margin-top: 0;}
 
-.reference_box p {margin: 0.5em;}
+.reference_box p {padding: 0 1em; margin: 0.5em auto;}
+
+a.imscared_link {color: #ff0000;}
+
+a.imscared_link:active {color: #bf0000;}
+
+a.roas_link {color: #00bfff;}
+
+a.roas_link:active {color: #007fbf;}
 
 .reference_border {width: 256px; border: 2px solid #808080;}
 
@@ -75,7 +89,11 @@ button {font-size: 1em; margin: 0.5em;}
 
 .reference_font_special {width: 70px;}
 
-.reference_palette {width: 350px; border: 10px solid #808080;}
+table {margin: auto;}
+
+td {font-weight: bold; width: 10em; padding: 1em;}
+
+table, td {border: 0.2em solid white; border-collapse: collapse;}
 
 @media (max-width: 950px) {
 	.reference_font_large {width: 704px;}
@@ -87,11 +105,12 @@ button {font-size: 1em; margin: 0.5em;}
 }
 
 @media (max-width: 600px) {
-	.reference_border {width: 80vw; border-width: 0.625vw;}
-	.reference_font_small {width: 90vw;}
-	.reference_font_large {width: 90vw;}
+	.reference_box p {padding: 0;}
+	.reference_border {width: 95vw; border-width: 0.625vw;}
+	.borderless_left {border-top-width: 0;}
+	.reference_font_small {width: 96vw;}
+	.reference_font_large {width: 96vw;}
 	.reference_font_special {width: 15vw;}
-	.reference_palette {width: 80vw; border-width: 2vw;}
 }
 
 .hidden {display: none;}

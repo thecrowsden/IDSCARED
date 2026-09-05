@@ -1,9 +1,7 @@
 /*
 by The Crow's Den
-v0.9.4
+v1.0
 */
-
-//ADD PORTABLE VERSION - single file + folder, body -> div
 
 let scale = {
 	preview: 4,
@@ -26,9 +24,11 @@ const div = {
 	preview_pixelfix: document.getElementById("div_preview_pixelfix"),
 	icon: document.getElementById("div_icon"),
 	sign: document.getElementById("div_sign"),
-	sign_warning: document.getElementById("div_sign_warning"),
 	sign_text: document.getElementById("div_sign_text"),
 	sign_text_info: document.getElementById("div_sign_text_info"),
+	sign_warning: document.getElementById("div_sign_warning"),
+	sign_bad_text: document.getElementById("div_sign_bad_text"),
+	sign_special_text: document.getElementById("div_sign_special_text"),
 	sign_draw: document.getElementById("div_sign_draw"),
 	exporter: document.getElementById("div_exporter"),
 	reference: document.getElementById("div_reference"),
@@ -90,6 +90,10 @@ const input = {
 		preview: document.getElementById("input_zoom_preview"),
 		icon: document.getElementById("input_zoom_icon"),
 		sign: document.getElementById("input_zoom_sign"),
+	},
+	size: {
+		icon: document.getElementById("input_size_icon"),
+		sign: document.getElementById("input_size_sign"),
 	},
 	btn: {
 		icon: {
@@ -188,12 +192,12 @@ const id_coords = {
 		},
 		sign_name: {
 			x: 5,
-			y: 12,
+			y: 11,
 			width: 114,
 		},
 		sign_info: {
 			x: 5,
-			y: 31,
+			y: 30,
 			width: 114,
 		},
 	},
@@ -212,7 +216,7 @@ const id_coords = {
 		},
 		sign_name: {
 			x: 1,
-			y: 10,
+			y: 9,
 			width: 83,
 		},
 		sign_info: {
@@ -277,17 +281,22 @@ let user_language = language.unset;
 
 let pixelfix = false;
 
-let sign_draw = false;
 let pen = {
 	icon: {
 		down: false,
 		color: color.fg,
+		size: 1,
 	},
 	sign: {
 		down: false,
 		color: color.fg,
+		size: 1,
 	},
 }
+
+let sign_draw = false;
+let sign_bad_text = false;
+let sign_special_text = false;
 
 function update_scale() {
 	scale.preview = input.zoom.preview.value;
@@ -402,6 +411,11 @@ function change_pen(input_pen_target, input_pen_color) {
 	}
 }
 
+function update_pen_size() {
+	pen.icon.size = input.size.icon.value;
+	pen.sign.size = input.size.sign.value;
+}
+
 function reset_icon() {
 	c.icon.drawImage(img.icon.template, 0, 0);
 	update_id();
@@ -426,8 +440,44 @@ function clear_sign() {
 	update_id();
 }
 
-function draw(destination, source, x, y) {
+function draw_pixel(destination, source, x, y) {
 	destination.drawImage(source, x, y, 1, 1, x, y, 1, 1);
+	update_id();
+}
+
+function draw(destination, source, raw_x, raw_y, size) {
+	switch (parseInt(size)) {
+		case 2:
+			draw_pixel(destination, source, Math.round(raw_x - 1), Math.round(raw_y - 1));
+			draw_pixel(destination, source, Math.round(raw_x), Math.round(raw_y - 1));
+			draw_pixel(destination, source, Math.round(raw_x - 1), Math.round(raw_y));
+			draw_pixel(destination, source, Math.round(raw_x), Math.round(raw_y));
+		break;
+		case 3:
+			draw_pixel(destination, source, Math.floor(raw_x), Math.floor(raw_y - 1));
+			draw_pixel(destination, source, Math.floor(raw_x - 1), Math.floor(raw_y));
+			draw_pixel(destination, source, Math.floor(raw_x), Math.floor(raw_y));
+			draw_pixel(destination, source, Math.floor(raw_x + 1), Math.floor(raw_y));
+			draw_pixel(destination, source, Math.floor(raw_x), Math.floor(raw_y + 1));
+		break;
+		case 4:
+			draw_pixel(destination, source, Math.round(raw_x - 1), Math.round(raw_y - 2));
+			draw_pixel(destination, source, Math.round(raw_x), Math.round(raw_y - 2));
+			draw_pixel(destination, source, Math.round(raw_x - 2), Math.round(raw_y - 1));
+			draw_pixel(destination, source, Math.round(raw_x - 1), Math.round(raw_y - 1));
+			draw_pixel(destination, source, Math.round(raw_x), Math.round(raw_y - 1));
+			draw_pixel(destination, source, Math.round(raw_x + 1), Math.round(raw_y - 1));
+			draw_pixel(destination, source, Math.round(raw_x - 2), Math.round(raw_y));
+			draw_pixel(destination, source, Math.round(raw_x - 1), Math.round(raw_y));
+			draw_pixel(destination, source, Math.round(raw_x), Math.round(raw_y));
+			draw_pixel(destination, source, Math.round(raw_x + 1), Math.round(raw_y));
+			draw_pixel(destination, source, Math.round(raw_x - 1), Math.round(raw_y + 1));
+			draw_pixel(destination, source, Math.round(raw_x), Math.round(raw_y + 1));
+		break;
+		default:
+			draw_pixel(destination, source, Math.floor(raw_x), Math.floor(raw_y));
+		break;
+	}
 	update_id();
 }
 
@@ -470,6 +520,19 @@ function str_to_font(input_str) {
 			output_array.push(valid_chars.special_map.BRACKET_OPEN);
 		} else if (i == "]") {
 			output_array.push(valid_chars.special_map.BRACKET_CLOSED);
+		} else if (i == "#") {
+			output_array.push(valid_chars.special_map.HASHTAG);
+		} else if (i == "=") {
+			output_array.push(valid_chars.special_map.SPECIAL_THIN_E);
+			sign_special_text = true;
+		} else if (i == ":") {
+			output_array.push(valid_chars.special_map.SPECIAL_COLON);
+			sign_special_text = true;
+		} else if (i == "|") {
+			output_array.push(valid_chars.special_map.SPECIAL_MINI_SPACE);
+			sign_special_text = true;
+		} else {
+			sign_bad_text = true;
 		}
 	}
 	return output_array;
@@ -479,7 +542,7 @@ function draw_font_char(destination, source, input_char, x, y) {
 	for (let i = 0; i < font[input_char].mask.length; ++i) {
 		for (let j = 0; j < font[input_char].mask[i].length; ++j) {
 			if (font[input_char].mask[i][j]) {
-				destination.drawImage(source, x + j, y + i, 1, 1, x + j, y + i, 1, 1);
+				draw_pixel(destination, source, x + j, y + i);
 			}
 		}
 	}
@@ -487,7 +550,8 @@ function draw_font_char(destination, source, input_char, x, y) {
 
 function draw_text(destination, source, input_text, x, y, width_cap) {
 	let offset = 0;
-	for (let i of str_to_font(input_text)) {
+	let input_text_arr = str_to_font(input_text);
+	for (let i of input_text_arr) {
 		if (offset + font[i].width < width_cap) {
 			draw_font_char(destination, source, i, x + offset, y);
 			offset += font[i].width;
@@ -497,14 +561,24 @@ function draw_text(destination, source, input_text, x, y, width_cap) {
 	}
 }
 function update_text() {
-	input.txt.name.value = Array.from(input.txt.name.value.toUpperCase()).filter(c => valid_chars.letters.includes(c) || valid_chars.numbers.includes(c) || valid_chars.special.includes(c)).join("");
+	sign_bad_text = false;
+	sign_special_text = false;
 	c.sign.drawImage(img[user_id_type].sign.template, 0, 0);
 	draw_text(c.sign, img[user_id_type].sign.fg, input.txt.name.value, id_coords[user_id_type].sign_name.x, id_coords[user_id_type].sign_name.y, id_coords[user_id_type].sign_name.width);
 	if (user_id_type == id_type.vip) {
-		input.txt.info.value = Array.from(input.txt.info.value.toUpperCase()).filter(c => valid_chars.letters.includes(c) || valid_chars.numbers.includes(c) || valid_chars.special.includes(c)).join("");
 		draw_text(c.sign, img[user_id_type].sign.fg, input.txt.info.value, id_coords[user_id_type].sign_info.x, id_coords[user_id_type].sign_info.y, id_coords[user_id_type].sign_info.width);
 	}
 	sign_warning_set(false);
+	if (sign_bad_text) {
+		div.sign_bad_text.classList.remove("hidden");
+	} else {
+		div.sign_bad_text.classList.add("hidden");
+	}
+	if (sign_special_text) {
+		div.sign_special_text.classList.remove("hidden");
+	} else {
+		div.sign_special_text.classList.add("hidden");
+	}
 	update_id();
 }
 
@@ -527,27 +601,27 @@ canvas.sign.addEventListener("pointercancel", () => pen.sign.down = false);
 canvas.icon.addEventListener("pointerdown", event => {
 	if (event.button == 0) {
 		pen.icon.down = true;
-		draw(c.icon, img.icon[pen.icon.color], Math.floor(event.offsetX / scale.icon), Math.floor(event.offsetY / scale.icon));
+		draw(c.icon, img.icon[pen.icon.color], event.offsetX / scale.icon, event.offsetY / scale.icon, pen.icon.size);
 	}
 	event.preventDefault();
 });
 canvas.icon.addEventListener("pointermove", event => {
 	if (pen.icon.down) {
-		draw(c.icon, img.icon[pen.icon.color], Math.floor(event.offsetX / scale.icon), Math.floor(event.offsetY / scale.icon));
+		draw(c.icon, img.icon[pen.icon.color], event.offsetX / scale.icon, event.offsetY / scale.icon, pen.icon.size);
 	}
 	event.preventDefault();
 });
 canvas.sign.addEventListener("pointerdown", event => {
 	if (sign_draw && event.button == 0) {
 		pen.sign.down = true;
-		draw(c.sign, img[user_id_type].sign[pen.sign.color], Math.floor(event.offsetX / scale.sign), Math.floor(event.offsetY / scale.sign));
+		draw(c.sign, img[user_id_type].sign[pen.sign.color], event.offsetX / scale.sign, event.offsetY / scale.sign, pen.sign.size);
 		sign_warning_set(true);
 	}
 	event.preventDefault();
 });
 canvas.sign.addEventListener("pointermove", event => {
 	if (pen.sign.down) {
-		draw(c.sign, img[user_id_type].sign[pen.sign.color], Math.floor(event.offsetX / scale.sign), Math.floor(event.offsetY / scale.sign));
+		draw(c.sign, img[user_id_type].sign[pen.sign.color], event.offsetX / scale.sign, event.offsetY / scale.sign, pen.sign.size);
 	}
 	event.preventDefault();
 });
@@ -563,486 +637,579 @@ const font = {
 			[false,false,false,false,],
 			[false,false,false,false,],
 			[false,false,false,false,],
+			[false,false,false,false,],
 		],
 	},
 	A: {
 		width: 8,
 		mask: [
-			[false,true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
 		],
 	},
 	B: {
 		width: 8,
 		mask: [
-			[true, true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, false,false,],
-			[true, true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	C: {
 		width: 8,
 		mask: [
-			[false,true, true, true, true, true, true, false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[false,true, true, true, true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,true ,false,],
 		],
 	},
 	D: {
 		width: 8,
 		mask: [
-			[true, true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	E: {
 		width: 8,
 		mask: [
-			[false,true, true, true, true, true, true, false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, true, true, false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[false,true, true, true, true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,true ,false,],
 		],
 	},
 	F: {
 		width: 8,
 		mask: [
-			[false,true, true, true, true, true, true, false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, true, true, false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
 		],
 	},
 	G: {
 		width: 8,
 		mask: [
-			[false,true, true, true, true, true, true, false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, true, true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[false,true, true, true, true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[false,true ,true ,true ,true ,true ,true ,false,],
 		],
 	},
 	H: {
 		width: 8,
 		mask: [
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
 		],
 	},
 	I: {
 		width: 4,
 		mask: [
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[true, true, true, false,],
+			[false,false,false,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
 		],
 	},
 	J: {
 		width: 8,
 		mask: [
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[true, true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	K: {
 		width: 8,
 		mask: [
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
 		],
 	},
 	L: {
 		width: 8,
 		mask: [
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, true, true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
 		],
 	},
 	M: {
 		width: 12,
 		mask: [
-			[true, true, true, true, true, true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,true, true, true, false,],
+			[false,false,false,false,false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,true ,true ,true ,false,],
 		],
 	},
 	N: {
 		width: 8,
 		mask: [
-			[true, true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
 		],
 	},
 	O: {
 		width: 8,
 		mask: [
-			[false,true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[false,true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	P: {
 		width: 8,
 		mask: [
-			[true, true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, true, false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
 		],
 	},
 	Q: {
 		width: 8,
 		mask: [
-			[false,true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[false,true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	R: {
 		width: 8,
 		mask: [
-			[true, true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
 		],
 	},
 	S: {
 		width: 8,
 		mask: [
-			[false,true, true, true, true, true, true, false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, true, true, true, false,false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[true, true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	T: {
 		width: 8,
 		mask: [
-			[true, true, true, true, true, true, true, false,],
-			[false,false,true, true, true, false,false,false,],
-			[false,false,true, true, true, false,false,false,],
-			[false,false,true, true, true, false,false,false,],
-			[false,false,true, true, true, false,false,false,],
-			[false,false,true, true, true, false,false,false,],
-			[false,false,true, true, true, false,false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
+			[false,false,true ,true ,true ,false,false,false,],
+			[false,false,true ,true ,true ,false,false,false,],
+			[false,false,true ,true ,true ,false,false,false,],
+			[false,false,true ,true ,true ,false,false,false,],
+			[false,false,true ,true ,true ,false,false,false,],
+			[false,false,true ,true ,true ,false,false,false,],
 		],
 	},
 	U: {
 		width: 8,
 		mask: [
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[false,true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	V: {
 		width: 8,
 		mask: [
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	W: {
 		width: 12,
 		mask: [
-			[true, true, true, false,true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	X: {
 		width: 8,
 		mask: [
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[false,true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
 		],
 	},
 	Y: {
 		width: 8,
 		mask: [
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, true, false,],
-			[false,false,true, true, true, false,false,false,],
-			[false,false,true, true, true, false,false,false,],
-			[false,false,true, true, true, false,false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
+			[false,false,true ,true ,true ,false,false,false,],
+			[false,false,true ,true ,true ,false,false,false,],
+			[false,false,true ,true ,true ,false,false,false,],
 		],
 	},
 	Z: {
 		width: 8,
 		mask: [
-			[true, true, true, true, true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,true, true, true, true, true, true, false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, true, true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
 		],
 	},
 	ZERO: {
 		width: 8,
 		mask: [
-			[false,true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[false,true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	ONE: {
 		width: 4,
 		mask: [
-			[true, true, true, false,],
-			[false,true, true, false,],
-			[false,true, true, false,],
-			[false,true, true, false,],
-			[false,true, true, false,],
-			[false,true, true, false,],
-			[false,true, true, false,],
+			[false,false,false,false,],
+			[true ,true ,true ,false,],
+			[false,true ,true ,false,],
+			[false,true ,true ,false,],
+			[false,true ,true ,false,],
+			[false,true ,true ,false,],
+			[false,true ,true ,false,],
+			[false,true ,true ,false,],
 		],
 	},
 	TWO: {
 		width: 8,
 		mask: [
-			[true, true, true, true, true, true, false,false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,true, true, true, true, true, true, false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, true, true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
 		],
 	},
 	THREE: {
 		width: 8,
 		mask: [
-			[true, true, true, true, true, true, false,false,],
-			[false,false,false,false,true, true, false,false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,true, true, true, true, false,false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, false,false,],
-			[true, true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[false,false,false,false,true ,true ,false,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,true ,true ,true ,true ,false,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	FOUR: {
 		width: 8,
 		mask: [
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
 		],
 	},
 	FIVE: {
 		width: 8,
 		mask: [
-			[true, true, true, true, true, true, true, false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, true, true, true, false,false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[true, true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	SIX: {
 		width: 8,
 		mask: [
-			[false,true, true, true, true, true, true, false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, false,false,false,false,false,],
-			[true, true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[false,true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	SEVEN: {
 		width: 8,
 		mask: [
-			[true, true, true, true, true, true, false,false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
+			[false,false,false,false,false,false,false,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
 		],
 	},
 	EIGHT: {
 		width: 8,
 		mask: [
-			[false,true, true, true, true, true, false,false,],
-			[false,true, true, false,true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[false,true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[false,true, true, false,true, true, false,false,],
-			[false,true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
+			[false,true ,true ,false,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[false,true ,true ,false,true ,true ,false,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	NINE: {
 		width: 8,
 		mask: [
-			[false,true, true, true, true, true, false,false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, false,true, true, true, false,],
-			[true, true, true, true, true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[false,false,false,false,true, true, true, false,],
-			[true, true, true, true, true, true, false,false,],
+			[false,false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[false,false,false,false,true ,true ,true ,false,],
+			[true ,true ,true ,true ,true ,true ,false,false,],
 		],
 	},
 	PARENTHESIS_OPEN: {
 		width: 4,
 		mask: [
-			[false,true, true, true, ],
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[false,true, true, true, ],
+			[false,false,false,false,],
+			[false,true ,true ,true ,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[false,true ,true ,true ,],
 		],
 	},
 	PARENTHESIS_CLOSED: {
 		width: 4,
 		mask: [
-			[true, true, true, false,],
-			[false,true, true, true, ],
-			[false,true, true, true, ],
-			[false,true, true, true, ],
-			[false,true, true, true, ],
-			[false,true, true, true, ],
-			[true, true, true, false,],
+			[false,false,false,false,],
+			[true ,true ,true ,false,],
+			[false,true ,true ,true ,],
+			[false,true ,true ,true ,],
+			[false,true ,true ,true ,],
+			[false,true ,true ,true ,],
+			[false,true ,true ,true ,],
+			[true ,true ,true ,false,],
 		],
 	},
 	BRACKET_OPEN: {
 		width: 4,
 		mask: [
-			[true, true, true, true, ],
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[true, true, true, false,],
-			[true, true, true, true, ],
+			[false,false,false,false,],
+			[true ,true ,true ,true ,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,false,],
+			[true ,true ,true ,true ,],
 		],
 	},
 	BRACKET_CLOSED: {
 		width: 4,
 		mask: [
-			[true, true, true, true, ],
-			[false,true, true, true, ],
-			[false,true, true, true, ],
-			[false,true, true, true, ],
-			[false,true, true, true, ],
-			[false,true, true, true, ],
-			[true, true, true, true, ],
+			[false,false,false,false,],
+			[true ,true ,true ,true ,],
+			[false,true ,true ,true ,],
+			[false,true ,true ,true ,],
+			[false,true ,true ,true ,],
+			[false,true ,true ,true ,],
+			[false,true ,true ,true ,],
+			[true ,true ,true ,true ,],
+		],
+	},
+	HASHTAG: {
+		width: 8,
+		mask: [
+			[true ,true ,true ,true ,true ,true ,true ,true ,],
+			[true ,false,false,false,false,false,false,true ,],
+			[true ,false,false,false,false,false,false,true ,],
+			[true ,false,false,false,false,false,false,true ,],
+			[true ,false,false,false,false,false,false,true ,],
+			[true ,false,false,false,false,false,false,true ,],
+			[true ,false,false,false,false,false,false,true ,],
+			[true ,true ,true ,true ,true ,true ,true ,true ,],
+		],
+	},
+	SPECIAL_THIN_E: {
+		width: 7,
+		mask: [
+			[false,false,false,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,false,],
+			[true ,true ,true ,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,],
+			[true ,true ,true ,true ,true ,false,false,],
+			[true ,true ,true ,false,false,false,false,],
+			[true ,true ,true ,false,false,false,false,],
+			[false,true ,true ,true ,true ,true ,false,],
+		],
+	},
+	SPECIAL_COLON: {
+		width: 3,
+		mask: [
+			[false,false,false,],
+			[true ,true ,false,],
+			[true ,true ,false,],
+			[false,false,false,],
+			[false,false,false,],
+			[false,false,false,],
+			[true ,true ,false,],
+			[true ,true ,false,],
+		],
+	},
+	SPECIAL_MINI_SPACE: {
+		width: 1,
+		mask: [
+			[false,],
+			[false,],
+			[false,],
+			[false,],
+			[false,],
+			[false,],
+			[false,],
+			[false,],
 		],
 	},
 }
@@ -1051,13 +1218,16 @@ const valid_chars = {
 	letters: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",],
 	numbers: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",],
 	number_map: ["ZERO", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE",],
-	special: [" ", "(", ")", "[", "]",],
 	special_map: {
 		SPACE: "SPACE",
 		PARENTHESIS_OPEN: "PARENTHESIS_OPEN",
 		PARENTHESIS_CLOSED: "PARENTHESIS_CLOSED",
 		BRACKET_OPEN: "BRACKET_OPEN",
 		BRACKET_CLOSED: "BRACKET_CLOSED",
+		HASHTAG: "HASHTAG",
+		SPECIAL_THIN_E: "SPECIAL_THIN_E",
+		SPECIAL_COLON: "SPECIAL_COLON",
+		SPECIAL_MINI_SPACE: "SPECIAL_MINI_SPACE",
 	},
 }
 
@@ -1070,10 +1240,10 @@ window.addEventListener("load", () => {
 			idmaker_setup(params.get("idtype"), language.en);
 		}
 	} else {
-		if (params.get("dev") == 1) {
+		if (params.get("dev") != null) {
 			dev_unlock();
 		}
-		if (params.get("info") == 1) {
+		if (params.get("info") != null) {
 			show_references();
 		}
 	}

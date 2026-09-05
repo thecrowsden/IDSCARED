@@ -3,7 +3,7 @@
 
 <!--
 by The Crow's Den
-v0.9.4
+v1.0
 -->
 
 <head>
@@ -34,7 +34,7 @@ v0.9.4
 	</div>
 	<div id="div_header">
 		<h1>IMSCARED ID Maker</h1>
-		<p class="topless"><sup>v0.9.4, by The Crow's Den</sup></p>
+		<p class="topless"><sup>v1.0, by The Crow's Den</sup></p>
 	</div>
 	<div id="div_css_unloaded" class="hidden">
 		<p>Loading stylesheet, please wait!</p>
@@ -91,6 +91,8 @@ v0.9.4
 					<canvas id="canvas_icon" class="canvas_draw border_base" width="41" height="37"></canvas>
 					<br>
 					<label>Pen Color:</label><button id="input_button_icon_fg" type="button" class="button_color button_white" onclick="change_pen(pen_target.icon, color.fg)"></button><button id="input_button_icon_bg" type="button" class="button_color button_black" onclick="change_pen(pen_target.icon, color.bg)"><span class="spacer"></span></button><button type="button" class="button_reset" onclick="reset_icon()">Reset</button><button type="button" class="button_reset" onclick="clear_icon()">Clear</button>
+					<br>
+					<label>Pen Size:</label><input id="input_size_icon" type="range" min="1" max="4" value="1" autocomplete="off" oninput="update_pen_size()">
 				</div>
 				<div id="div_sign">
 					<h2>NAME:</h2>
@@ -98,6 +100,7 @@ v0.9.4
 					<br>
 					<canvas id="canvas_sign" class="border_base"></canvas>
 					<br>
+					<label>Draw Signature:</label><input id="input_bool_sign_draw" type="checkbox" autocomplete="off" oninput="update_sign_draw_state()">
 					<div id="div_sign_text">
 						<label class="label_text">Name:</label><input id="input_text_name" type="text" placeholder="NAME" spellcheck="false" autocomplete="off" oninput="update_text()">
 						<div id="div_sign_text_info" class="hidden">
@@ -106,11 +109,18 @@ v0.9.4
 						<div id="div_sign_warning" class="hidden">
 							<p class="text_error topless bottomless">WARNING: Changing the text will reset your drawing!</p>
 						</div>
+						<div id="div_sign_bad_text" class="hidden">
+							<p class="text_error topless bottomless">Can only use A&#8209;Z, 0&#8209;9, (&nbsp;), [&nbsp;], #, and spaces.</p>
+						</div>
+						<div id="div_sign_special_text" class="hidden">
+							<p class="text_error topless bottomless">Special characters are not accurate to the original font.</p>
+						</div>
 					</div>
 					<div id="div_sign_draw" class="hidden">
 						<label>Pen Color:</label><button id="input_button_sign_fg" type="button" class="button_color" onclick="change_pen(pen_target.sign, color.fg)"></button><button id="input_button_sign_bg" type="button" class="button_color" onclick="change_pen(pen_target.sign, color.bg)"></button><span class="spacer"></span><button type="button" class="button_reset" onclick="reset_sign()">Reset</button>
+						<br>
+						<label>Pen Size:</label><input id="input_size_sign" type="range" min="1" max="4" value="1" autocomplete="off" oninput="update_pen_size()">
 					</div>
-					<label>Draw Signature:</label><input id="input_bool_sign_draw" type="checkbox" autocomplete="off" oninput="update_sign_draw_state()">
 				</div>
 				<div id="div_exporter">
 					<button type="button" class="button_download" onclick="download_id()">DOWNLOAD</button>
@@ -118,25 +128,89 @@ v0.9.4
 			</div>
 			<div id="div_reference" class="hidden reference_box">
 				<button type="button" onclick="hide_references()">Back</button>
-				<h2 class="topless">Placeholder text, please come back later!</h2>
-				<p>Placeholder - intro</p>
-				<p>Placeholder - masks</p>
+				<h2 class="topless">Hello!</h2>
+				<p>Welcome to the <b>IMSCARED ID Maker</b>! If you're not sure what this is for, you probably don't need it.</p>
+				<p>This unofficial tool allows you to customize your VIP Badge or Worker Card from the <a class="imscared_link" href="https://store.steampowered.com/app/429720/IMSCARED/" target="_blank">IMSCARED</a> post&#8209;game, for use in <a class="roas_link" href="https://store.steampowered.com/app/4171520/Remnants_of_a_Scare/" target="_blank">Remnants of a Scare</a>. By customizing your ID, you can see your own personalized ID in&#8209;game! However, this has a few limitations and quirks, so this ID Maker is designed to make the process as easy as possible, and ensure that your custom ID appears correctly.</p>
+				<p><sup>"ID" refers to your VIP Badge or Worker Card.</sup></p>
+				<br>
+				<p>To use the ID Maker, simply select your ID file using the file selector on the main page (or drag the ID file onto it). If you have previously modified your ID, you will be provided with a new blank ID for customization. If you have renamed your ID, it will not be recognized, so it is best to use the original ID file located in your "imscared" Desktop folder. Once you have finished customizing your ID, download your new ID with the Download button, delete (or move/rename) your original ID, and then place your new ID in the "imscared" Desktop folder. If you rename the new ID, it will not appear in&#8209;game, so ensure the name is correct.</p>
+				<br>
+				<p>It should be noted that there are a few limitations to the ID Maker. This is to ensure that your custom ID appears correctly in&#8209;game. However, if you wish to further customize your ID, there is complete documentation below on how exactly the IDs are designed, and how they appear in&#8209;game. By clicking the Download button at the bottom of this page, you can download all of the images to use as reference.</p>
+				<br>
+				<br>
+				<p>Note: IDs are intended to be 128x128 pixel images. Scaling the ID to other resolutions will cause unintended issues with how it appears in&#8209;game.</p>
+				<br>
+				<br>
 				<img loading="lazy" class="reference_border" src="./images/references/vip_mask.png" alt=""><img loading="lazy" class="reference_border borderless_left" src="./images/references/worker_mask.png" alt="">
-				<p>Placeholder - alpha</p>
+				<p>Not everything on your ID appears in Remnants of a Scare. Instead, the game takes the icon and Name/Info portions of your custom ID and applies them on top of a default blank ID. The above images showcase the exact portions of each ID that appear in&#8209;game. Content in the white regions appears in&#8209;game, while content in the black regions does not. The first image is for VIP Badges, and the second image is for Worker Cards.</p>
+				<br>
+				<br>
 				<img loading="lazy" class="reference_border" src="./images/references/alpha_pixel.png" alt="">
-				<p>Placeholder - shine</p>
+				<p>Any pixels that are the same color as the bottom left pixel will not appear. Instead, they will be replaced with the equivalent pixels on a default blank ID. For VIP Badges, the original color here is solid black (#000000), and for Worker Cards, it is solid white (#FFFFFF). This means that any solid black/white pixels will not appear correctly in game, unless you change the color of the bottom left pixel. For reference, the white pixel in the image above is the pixel that is checked. Any transparent pixels will also be replaced with the equivalent pixels on a default blank ID.</p>
+				<br>
+				<br>
 				<img loading="lazy" class="reference_border" src="./images/references/vip_shine.png" alt=""><img loading="lazy" class="reference_border borderless_left" src="./images/references/worker_shine.png" alt="">
-				<p>Placeholder - font</p>
+				<p>The above images are the shine patterns of the IDs. The white pixels on these images represent which pixels on the original IDs are replaced with their corresponding shine colors. This is not important for functionality, but helps ensure that your ID matches the default blank IDs. The first image is for VIP Badges, and the second image is for Worker Cards.</p>
+				<br>
+				<br>
 				<img loading="lazy" class="reference_font_small" src="./images/references/font_normal.png" alt="">
-				<p>Placeholder - large font</p>
+				<p>This is the font used for the IDs. It is the font <a href="https://www.dafont.com/8bit-wonder.font" target="_blank">8 Bit Wonder</a> at 8px scale, with Antialiasing disabled. It is specifically capitalized letters, as lowercase letters appear slightly differently. The square shape is the "#" symbol.</p>
+				<br>
+				<br>
 				<img loading="lazy" class="reference_font_large" src="./images/references/font_large.png" alt="">
-				<p>Placeholder - special font</p>
+				<p>This is the font used for the "VIP PASS" text on VIP Badges. It is the font <a href="https://www.dafont.com/8bit-wonder.font" target="_blank">8 Bit Wonder</a> at 12px scale, with Antialiasing disabled. The same information as above applies to this as well, as the only difference is the font size.</p>
+				<br>
+				<br>
 				<img loading="lazy" class="reference_font_special" src="./images/references/font_special.png" alt="">
-				<p>Placeholder - palette</p>
-				<!--replace with table?-->
-				<img loading="lazy" class="reference_palette" src="./images/references/palette.png" alt="">
-				<p>Placeholder - download</p>
-				<a href="./images/references/imscared_id_references.7z" download="IMSCARED ID References.7z"><button>Download (!)</button></a>
+				<p>These are special characters that do not appear in the actual font. Both of these appear exclusively in the "NAME:" text on Worker Cards. On the left is the letter "E", which is notably one pixel thinner than a normal E. On the right is the colon. The spacing around these characters may not be fully accurate. In the ID Maker, the E can be typed with "=" while the colon can be typed with ":". In addition, a single pixel space can be typed with "|" to adjust the spacing when using these characters. Using these, the "NAME:" text as it appears on Worker Cards can be typed with "NAM=|:".</p>
+				<br>
+				<br>
+				<table>
+					<tr>
+						<td style="background-color: #FAFDFF; color: black;">White<br>#FAFDFF</td>
+						<td style="background-color: #F3F9FD; color: black;">White Shine<br>#F3F9FD</td>
+					</tr>
+					<tr>
+						<td style="background-color: #16171A; color: white;">Black<br>#16171A</td>
+						<td style="background-color: #32373C; color: white;">Black Shine<br>#32373C</td>
+					</tr>
+					<tr>
+						<td style="background-color: #ADCEE1; color: black;">Border 1<br>#ADCEE1</td>
+						<td style="background-color: #B1D0E3; color: black;">Border 1 Shine<br>#B1D0E3</td>
+					</tr>
+					<tr>
+						<td style="background-color: #68AED4; color: black;">Border 2<br>#68AED4</td>
+						<td style="background-color: #77B6D8; color: black;">Border 2 Shine<br>#77B6D8</td>
+					</tr>
+					<tr>
+						<td style="background-color: #234975; color: white;">Shadow<br>#234975</td>
+						<td style="background-color: #3D6188; color: white;">Shadow Shine<br>#3D6188</td>
+					</tr>
+					<tr>
+						<td colspan=2 style="background-color: #000000; color: white;">Background<br>#000000</td>
+					</tr>
+				</table>
+				<p>This is the color palette that appears on VIP Badges. The left colors are the standard colors, and the right colors are the corresponding shine colors. "Border 1" refers to the top and right edges, while "Border 2" refers to the bottom and left edges.</p>
+				<br>
+				<br>
+				<table>
+					<tr>
+						<td style="background-color: #16171A; color: white;">Black<br>#16171A</td>
+						<td style="background-color: #1B1C1F; color: white;">Black Shine<br>#1B1C1F</td>
+					</tr>
+					<tr>
+						<td style="background-color: #FAFDFF; color: black;">White<br>#FAFDFF</td>
+						<td style="background-color: #FAFDFF; color: black;">White Shine<br>#FAFDFF</td>
+					</tr>
+					<tr>
+						<td style="background-color: #FFFFFF; color: black;">Background<br>#FFFFFF</td>
+						<td style="background-color: #C8C8C9; color: black;">Misplaced Pixel<br>#C8C8C9</td>
+					</tr>
+				</table>
+				<p>This is the color patette that appears on Worker Cards. Note that white does not have a different shine color, as it appears as the same color across the entire Worker Card. "Misplaced Pixel" refers to the incorrectly placed pixel near the top right corner of the default blank Worker Card.</p>
+				<br>
+				<br>
+				<a href="./images/references/imscared_id_references.zip" download="IMSCARED ID References.zip"><button>Download Reference Images</button></a>
 			</div>
 		</div>
 	</div>
